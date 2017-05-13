@@ -1,13 +1,13 @@
 
 -- +goose Up
 -- SQL in section 'Up' is executed when this migration is applied
-CREATE TABLE users (
+CREATE TABLE teams_users (
     id SERIAL PRIMARY KEY,
-    display_name text,
-    email text UNIQUE,
-    password_digest text
+    team_id integer REFERENCES teams,
+    user_id integer REFERENCES users,
+    admin_user boolean
 );
 
 -- +goose Down
 -- SQL section 'Down' is executed when this migration is rolled back
-DROP TABLE users;
+DROP TABLE teams_users;

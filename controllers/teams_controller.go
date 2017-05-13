@@ -5,15 +5,15 @@ import (
 
 	"fmt"
 
-	"github.com/aadeschamps/giftexchangeapi/models"
+	"github.com/aadeschamps/meeting-metrics/models"
 )
 
-// GroupController exports all methods needed to act on users
+// TeamsController exports all methods needed to act on users
 type TeamsController struct {
-	Group *models.TeamModel
+	Team *models.TeamModel
 }
 
-// Show retrieves a specific group by id
+// Show retrieves a specific team by id
 func (c *TeamsController) Show(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "hello, groups!")
 }

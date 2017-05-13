@@ -11,21 +11,25 @@ type UserModel struct {
 
 // User to be passed around to actions / json encoded in responses
 type User struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	TeamID string `json:"team_id"`
+	ID                   string `json:"id"`
+	DisplayName          string `json:"display_name"`
+	Email                string `json:"email"`
+	Password             string `json:"password,omitempty"`
+	PasswordConfirmation string `json:"password_confirmation,omitempty"`
 }
 
 // Create takes in a User and saves it to the database, returning the saved user
 func (um *UserModel) Create(u *User) (*User, error) {
 	var newUser User
+	// bcrypt here for password storage
+	passwordDigest := u.Password
 	query := `
-		INSERT INTO 
-		users (name)
-		VALUES ($1)
+		INSERT INTO users
+		(display_name, email, password_digest)
+		VALUES ($1,$2, $3)
 		RETURNING id
 	`
-	err := um.Db.QueryRow(query, u.Name).Scan(&newUser.ID)
+	err := um.Db.QueryRow(query, u.DisplayName, u.Email, passwordDigest).Scan(&newUser.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +39,7 @@ func (um *UserModel) Create(u *User) (*User, error) {
 // GetAll retreives all Users from the database and returns them in a list of Users
 func (um *UserModel) GetAll() ([]*User, error) {
 	query := `
-		SELECT *
+		SELECT id, display_name, email
 		FROM users
 	`
 	rows, err := um.Db.Query(query)
@@ -46,7 +50,7 @@ func (um *UserModel) GetAll() ([]*User, error) {
 	users := []*User{}
 	for rows.Next() {
 		newUser := User{}
-		err := rows.Scan(&newUser.ID, &newUser.Name)
+		err := rows.Scan(&newUser.ID, &newUser.DisplayName, &newUser.Email)
 		if err != nil {
 			return nil, err
 		}
@@ -58,14 +62,14 @@ func (um *UserModel) GetAll() ([]*User, error) {
 // Get gets a specific user
 func (um *UserModel) Get(u *User) (*User, error) {
 	query := `
-		SELECT *
+		SELECT id, display_name, email
 		FROM users
 		WHERE
 		id = $1
 	`
 	row := um.Db.QueryRow(query, u.ID)
 	var user User
-	err := row.Scan(&user.ID, &user.Name)
+	err := row.Scan(&user.ID, &user.DisplayName, &user.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -77,11 +81,11 @@ func (um *UserModel) Update(u *User) (*User, error) {
 	query := `
 		UPDATE users
 		SET
-		name = $2
+		display_name = $2
 		WHERE
 		id = $1
 	`
-	_, err := um.Db.Exec(query, u.ID, u.Name)
+	_, err := um.Db.Exec(query, u.ID, u.DisplayName, &u.Email)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ type SessionModel struct {
 
 // Session respresents a session from the db
 type Session struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	TeamID string `json:"team_id"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	MeetingID string `json:"meeting_id"`
 }

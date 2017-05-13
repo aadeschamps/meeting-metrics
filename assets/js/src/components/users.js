@@ -29,14 +29,16 @@ class Users extends React.Component {
     }
 
     renderUsers() {
+        console.log(this.state.users);
         return map(this.state.users, (user) => {
             return (
-                <li key={ user.id }> { user.id }. { user.name }</li>
+                <li key={ user.id }> { user.id }. { user.display_name }</li>
             )
         })
     }
 
     render() {
+        console.log('heyyyyyy');
         return (
             <ul>
                 { this.state.usersLoaded ? this.renderUsers() : this.renderLoading() }

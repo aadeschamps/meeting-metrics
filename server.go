@@ -11,9 +11,9 @@ import (
 
 	"os"
 
-	"github.com/aadeschamps/giftexchangeapi/controllers"
-	"github.com/aadeschamps/giftexchangeapi/middlewares"
-	"github.com/aadeschamps/giftexchangeapi/models"
+	"github.com/aadeschamps/meeting-metrics/controllers"
+	"github.com/aadeschamps/meeting-metrics/middlewares"
+	"github.com/aadeschamps/meeting-metrics/models"
 	"github.com/gorilla/mux"
 	"github.com/urfave/negroni"
 )
@@ -31,8 +31,6 @@ func main() {
 	dbInfo := fmt.Sprintf("user=%s password=%s dbname=%s",
 		username, password, dbname)
 
-	fmt.Println(dbInfo)
-
 	db, err := sql.Open("postgres", dbInfo)
 	if err != nil {
 		panic(err)
@@ -47,11 +45,11 @@ func main() {
 
 	// make models
 	userModel := models.UserModel{Db: db}
-	groupModel := models.GroupModel{Db: db}
+	teamModel := models.TeamModel{Db: db}
 
 	// make controllers
 	userController := controllers.UserController{User: &userModel}
-	groupController := controllers.GroupController{Group: &groupModel}
+	teamController := controllers.TeamsController{Team: &teamModel}
 
 	// instantiate all api handlers
 	api := router.PathPrefix("/api/v1/").Subrouter()
@@ -60,7 +58,7 @@ func main() {
 	api.HandleFunc("/users/{id}", userController.Show).Methods("GET")
 	api.HandleFunc("/users/{id}", userController.Update).Methods("PUT")
 
-	api.HandleFunc("/groups/{id}", groupController.Show).Methods("GET")
+	api.HandleFunc("/groups/{id}", teamController.Show).Methods("GET")
 
 	// instantiate static and index files serving
 	fs := http.FileServer(http.Dir("./assets"))

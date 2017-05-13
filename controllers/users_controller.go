@@ -6,7 +6,7 @@ import (
 
 	"fmt"
 
-	"github.com/aadeschamps/giftexchangeapi/models"
+	"github.com/aadeschamps/meeting-metrics/models"
 	"github.com/gorilla/mux"
 )
 
@@ -40,6 +40,7 @@ func (c *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	user, err := c.User.Create(&newUser)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(err)
 		return

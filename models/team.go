@@ -11,6 +11,7 @@ type TeamModel struct {
 
 // Team respresents a group from the db
 type Team struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID    string  `json:"id"`
+	Name  string  `json:"name"`
+	Users []*User `json:"users"`
 }
