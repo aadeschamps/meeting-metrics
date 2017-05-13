@@ -85,7 +85,7 @@ func (um *UserModel) Update(u *User) (*User, error) {
 		WHERE
 		id = $1
 	`
-	_, err := um.Db.Exec(query, u.ID, u.DisplayName, &u.Email)
+	_, err := um.Db.Exec(query, u.ID, u.DisplayName)
 	if err != nil {
 		return nil, err
 	}
