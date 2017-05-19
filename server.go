@@ -50,9 +50,11 @@ func main() {
 	// make controllers
 	userController := controllers.UserController{User: &userModel}
 	teamController := controllers.TeamsController{Team: &teamModel}
+	sessionController := controllers.SessionController{User: &userModel}
 
 	// instantiate all api handlers
 	api := router.PathPrefix("/api/v1/").Subrouter()
+	api.HandleFunc("/login", sessionController.Create).Methods("POST")
 	api.HandleFunc("/users", userController.Index).Methods("GET")
 	api.HandleFunc("/users", userController.Create).Methods("POST")
 	api.HandleFunc("/users/{id}", userController.Show).Methods("GET")

@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,6 +19,7 @@ type User struct {
 	Email                string `json:"email"`
 	Password             string `json:"password,omitempty"`
 	PasswordConfirmation string `json:"password_confirmation,omitempty"`
+	PasswordDigest       string `json:"password_digest,omitempty"`
 }
 
 // Create takes in a User and saves it to the database, returning the saved user
@@ -68,14 +70,14 @@ func (um *UserModel) GetAll() ([]*User, error) {
 // Get gets a specific user
 func (um *UserModel) Get(u *User) (*User, error) {
 	query := `
-		SELECT id, display_name, email, password_digest
+		SELECT id, display_name, email
 		FROM users
 		WHERE
 		id = $1
 	`
 	row := um.Db.QueryRow(query, u.ID)
 	var user User
-	err := row.Scan(&user.ID, &user.DisplayName, &user.Email, &user.Password)
+	err := row.Scan(&user.ID, &user.DisplayName, &user.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -96,4 +98,26 @@ func (um *UserModel) Update(u *User) (*User, error) {
 		return nil, err
 	}
 	return um.Get(u)
+}
+
+// Authenticate takes in a username and password and returns the user
+// or an error
+func (um *UserModel) Authenticate(u *User) (*User, error) {
+	query := `
+		SELECT id, password_digest
+		FROM users
+		WHERE
+		email = $1
+	`
+	row := um.Db.QueryRow(query, u.Email)
+	var user User
+	err := row.Scan(&user.ID, &user.PasswordDigest)
+	if err != nil {
+		return nil, err
+	}
+	passwordMismatchErr := bcrypt.CompareHashAndPassword([]byte(user.PasswordDigest), []byte(u.Password))
+	if passwordMismatchErr != nil {
+		return nil, errors.New("Password did not match")
+	}
+	return u, nil
 }

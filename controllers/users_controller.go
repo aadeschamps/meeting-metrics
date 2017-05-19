@@ -66,9 +66,3 @@ func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(user)
 }
-
-// Authenticate authenticates a user and sends it
-func (c *UserController) Authenticate(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-
-}
