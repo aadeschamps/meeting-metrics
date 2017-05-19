@@ -2,6 +2,8 @@ package models
 
 import (
 	"database/sql"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // UserModel contains db and performs actions
@@ -21,17 +23,21 @@ type User struct {
 // Create takes in a User and saves it to the database, returning the saved user
 func (um *UserModel) Create(u *User) (*User, error) {
 	var newUser User
-	// bcrypt here for password storage
-	passwordDigest := u.Password
+	password := []byte(u.Password)
+	passwordDigest, hashErr := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	if hashErr != nil {
+		return nil, hashErr
+	}
+
 	query := `
 		INSERT INTO users
 		(display_name, email, password_digest)
 		VALUES ($1,$2, $3)
 		RETURNING id
 	`
-	err := um.Db.QueryRow(query, u.DisplayName, u.Email, passwordDigest).Scan(&newUser.ID)
-	if err != nil {
-		return nil, err
+	dbCreateErr := um.Db.QueryRow(query, u.DisplayName, u.Email, string(passwordDigest)).Scan(&newUser.ID)
+	if dbCreateErr != nil {
+		return nil, dbCreateErr
 	}
 	return um.Get(&newUser)
 }
@@ -62,14 +68,14 @@ func (um *UserModel) GetAll() ([]*User, error) {
 // Get gets a specific user
 func (um *UserModel) Get(u *User) (*User, error) {
 	query := `
-		SELECT id, display_name, email
+		SELECT id, display_name, email, password_digest
 		FROM users
 		WHERE
 		id = $1
 	`
 	row := um.Db.QueryRow(query, u.ID)
 	var user User
-	err := row.Scan(&user.ID, &user.DisplayName, &user.Email)
+	err := row.Scan(&user.ID, &user.DisplayName, &user.Email, &user.Password)
 	if err != nil {
 		return nil, err
 	}

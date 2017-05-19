@@ -19,7 +19,6 @@ type UserController struct {
 func (c *UserController) Index(w http.ResponseWriter, r *http.Request) {
 	users, err := c.User.GetAll()
 	if err != nil {
-		fmt.Println(err)
 		fmt.Fprint(w, http.StatusInternalServerError)
 	} else {
 		json.NewEncoder(w).Encode(users)
@@ -30,8 +29,14 @@ func (c *UserController) Index(w http.ResponseWriter, r *http.Request) {
 func (c *UserController) Show(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userToFind := models.User{ID: params["id"]}
-	users, _ := c.User.Get(&userToFind)
-	json.NewEncoder(w).Encode(users)
+	user, err := c.User.Get(&userToFind)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+	user.Password = ""
+	json.NewEncoder(w).Encode(user)
 }
 
 // Create creates a user and sends it
@@ -60,4 +65,10 @@ func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(user)
+}
+
+// Authenticate authenticates a user and sends it
+func (c *UserController) Authenticate(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
 }
